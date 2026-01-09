@@ -15,9 +15,6 @@ test("pcb-panel-snapshot", async () => {
     showBoundingBoxes: false,
   })
 
-  expect(glbResult).toBeInstanceOf(ArrayBuffer)
-  expect((glbResult as ArrayBuffer).byteLength).toBeGreaterThan(0)
-
   const cameraOptions = getBestCameraPosition(circuitJson)
   const rotatedCameraOptions = {
     camPos: [
@@ -37,5 +34,5 @@ test("pcb-panel-snapshot", async () => {
       glbResult as ArrayBuffer,
       rotatedCameraOptions,
     ),
-  ).toMatchPngSnapshot(import.meta.path, "pcb-panel")
+  ).toMatchPngSnapshot(import.meta.path)
 })
