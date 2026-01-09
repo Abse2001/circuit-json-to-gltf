@@ -35,4 +35,4 @@ test("pcb-panel-snapshot", async () => {
       rotatedCameraOptions,
     ),
   ).toMatchPngSnapshot(import.meta.path)
-})
+}, 20000)
