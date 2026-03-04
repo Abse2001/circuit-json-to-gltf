@@ -27,8 +27,13 @@ async function getOcctModule(): Promise<any> {
     if (isBrowser) {
       let wasmUrl: string | undefined
       try {
-        wasmUrl = (await import("occt-import-js/dist/occt-import-js.wasm?url"))
-          .default
+        const importModule = new Function(
+          "specifier",
+          "return import(specifier)",
+        ) as (specifier: string) => Promise<{ default: string }>
+        wasmUrl = (
+          await importModule("occt-import-js/dist/occt-import-js.wasm?url")
+        ).default
       } catch {
         wasmUrl = undefined
       }
