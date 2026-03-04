@@ -42,14 +42,22 @@ declare global {
   }
 }
 
-export default function CircuitToGltfDemo() {
+interface CircuitToGltfDemoProps {
+  initialCircuitJson?: unknown
+  initialFormat?: "gltf" | "glb"
+}
+
+export default function CircuitToGltfDemo({
+  initialCircuitJson,
+  initialFormat = "gltf",
+}: CircuitToGltfDemoProps = {}) {
   const [gltfUrl, setGltfUrl] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>("")
   const [circuitJson, setCircuitJson] = useState(
-    JSON.stringify(usbCFlashlightCircuit, null, 2),
+    JSON.stringify(initialCircuitJson ?? usbCFlashlightCircuit, null, 2),
   )
-  const [format, setFormat] = useState<"gltf" | "glb">("gltf")
+  const [format, setFormat] = useState<"gltf" | "glb">(initialFormat)
 
   const convertToGltf = async () => {
     setLoading(true)

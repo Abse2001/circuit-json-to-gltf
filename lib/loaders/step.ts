@@ -21,7 +21,24 @@ async function getOcctModule(): Promise<any> {
   if (!occtModulePromise) {
     // @ts-expect-error - occt-import-js uses CommonJS exports
     const occtimportjs = (await import("occt-import-js")).default
-    occtModulePromise = occtimportjs()
+    const isBrowser =
+      typeof window !== "undefined" || typeof self !== "undefined"
+
+    if (isBrowser) {
+      let wasmUrl: string | undefined
+      try {
+        wasmUrl = (await import("occt-import-js/dist/occt-import-js.wasm?url"))
+          .default
+      } catch {
+        wasmUrl = undefined
+      }
+      occtModulePromise = occtimportjs({
+        locateFile: (path: string) =>
+          path.endsWith(".wasm") && wasmUrl ? wasmUrl : path,
+      })
+    } else {
+      occtModulePromise = occtimportjs()
+    }
   }
   return occtModulePromise
 }
