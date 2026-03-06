@@ -39,3 +39,4 @@ relevant-repos
 .vercel
 *.diff.png
 .aider*
+test-results/
