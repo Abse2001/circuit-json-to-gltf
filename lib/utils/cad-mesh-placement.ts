@@ -10,19 +10,25 @@ import {
   getBoundingBoxCenter,
   getBoundingBoxSize,
   rotatePoint,
+  rotateMesh,
   scaleMesh,
   scaleMeshByAxis,
 } from "./mesh-scale"
 
-export function getModelOrientationRotation(cad: CadComponent): Point3 {
-  const modelBoardNormalDirection = cad.model_board_normal_direction
-  if (!modelBoardNormalDirection) {
+function getOrientationRotationForBoardNormal(
+  modelBoardNormalDirection?: CadComponent["model_board_normal_direction"],
+): Point3 {
+  if (!modelBoardNormalDirection || modelBoardNormalDirection === "z+") {
     return { x: 0, y: 0, z: 0 }
   }
 
   switch (modelBoardNormalDirection) {
+    case "x+":
+      return { x: 0, y: 0, z: 90 }
     case "x-":
       return { x: 0, y: 0, z: -90 }
+    case "y+":
+      return { x: 0, y: 0, z: 0 }
     case "y-":
       return { x: 0, y: 0, z: 180 }
     case "z-":
@@ -32,12 +38,22 @@ export function getModelOrientationRotation(cad: CadComponent): Point3 {
   }
 }
 
+export function applyModelBoardNormalTransform<T extends STLMesh | OBJMesh>(
+  mesh: T,
+  modelBoardNormalDirection?: CadComponent["model_board_normal_direction"],
+): T {
+  return rotateMesh(
+    mesh,
+    getOrientationRotationForBoardNormal(modelBoardNormalDirection),
+  )
+}
+
 export function getMeshOrigin(
   cad: CadComponent,
   meshBounds: { min: Point3; max: Point3 },
   options?: {
     loaderTransform?: CoordinateTransformConfig
-    orientationRotation?: Point3
+    modelBoardNormalDirection?: CadComponent["model_board_normal_direction"]
     modelScaleFactor?: number
   },
 ): Point3 | null {
@@ -53,8 +69,11 @@ export function getMeshOrigin(
       origin = applyCoordinateTransform(origin, options.loaderTransform)
     }
 
-    if (options?.orientationRotation) {
-      origin = rotatePoint(origin, options.orientationRotation)
+    if (options?.modelBoardNormalDirection) {
+      origin = rotatePoint(
+        origin,
+        getOrientationRotationForBoardNormal(options.modelBoardNormalDirection),
+      )
     }
 
     return origin

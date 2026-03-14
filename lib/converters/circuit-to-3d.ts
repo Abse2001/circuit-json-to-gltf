@@ -22,14 +22,13 @@ import type {
   Scene3D,
 } from "../types"
 import {
+  applyModelBoardNormalTransform,
   fitMeshToCadBounds,
   getMeshOrigin,
-  getModelOrientationRotation,
 } from "../utils/cad-mesh-placement"
 import { getDefaultModelTransform } from "../utils/get-default-model-transform"
 import {
   getBoundingBoxSize,
-  rotateMesh,
   scaleMesh,
   translateMesh,
 } from "../utils/mesh-scale"
@@ -491,12 +490,14 @@ export async function convertCircuitJsonTo3D(
     }
 
     if (box.mesh) {
-      const modelOrientationRotation = getModelOrientationRotation(cad)
-      box.mesh = rotateMesh(box.mesh, modelOrientationRotation)
+      box.mesh = applyModelBoardNormalTransform(
+        box.mesh,
+        cad.model_board_normal_direction,
+      )
 
       const meshOrigin = getMeshOrigin(cad, box.mesh.boundingBox, {
         loaderTransform: defaultTransform,
-        orientationRotation: modelOrientationRotation,
+        modelBoardNormalDirection: cad.model_board_normal_direction,
         modelScaleFactor,
       })
       if (meshOrigin) {
