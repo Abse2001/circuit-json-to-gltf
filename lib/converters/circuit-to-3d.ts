@@ -24,12 +24,11 @@ import type {
 import {
   fitMeshToCadBounds,
   getMeshOrigin,
-  getModelOrientationRotation,
+  getMeshWithBoardNormalTransform,
 } from "../utils/cad-mesh-placement"
 import { getDefaultModelTransform } from "../utils/get-default-model-transform"
 import {
   getBoundingBoxSize,
-  rotateMesh,
   scaleMesh,
   translateMesh,
 } from "../utils/mesh-scale"
@@ -491,9 +490,15 @@ export async function convertCircuitJsonTo3D(
     }
 
     if (box.mesh) {
-      box.mesh = rotateMesh(box.mesh, getModelOrientationRotation(cad))
+      box.mesh = getMeshWithBoardNormalTransform(
+        box.mesh,
+        cad.model_board_normal_direction,
+      )
 
-      const meshOrigin = getMeshOrigin(cad, box.mesh.boundingBox)
+      const meshOrigin = getMeshOrigin(cad, box.mesh.boundingBox, {
+        loaderTransform: defaultTransform,
+        modelBoardNormalDirection: cad.model_board_normal_direction,
+      })
       if (meshOrigin) {
         box.mesh = translateMesh(box.mesh, {
           x: -meshOrigin.x,

@@ -16,7 +16,7 @@ function scalePointByAxis(point: Point3, scale: Point3): Point3 {
   }
 }
 
-function rotatePoint(point: Point3, rotationDeg: Point3): Point3 {
+export function rotatePoint(point: Point3, rotationDeg: Point3): Point3 {
   let { x, y, z } = point
 
   if (rotationDeg.x !== 0) {

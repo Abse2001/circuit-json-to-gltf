@@ -1,21 +1,34 @@
 import type { CadComponent } from "circuit-json"
-import type { OBJMesh, Point3, STLMesh } from "../types"
+import type {
+  CoordinateTransformConfig,
+  OBJMesh,
+  Point3,
+  STLMesh,
+} from "../types"
+import { applyCoordinateTransform } from "./coordinate-transform"
 import {
   getBoundingBoxCenter,
   getBoundingBoxSize,
+  rotatePoint,
+  rotateMesh,
   scaleMesh,
   scaleMeshByAxis,
 } from "./mesh-scale"
 
-export function getModelOrientationRotation(cad: CadComponent): Point3 {
-  const modelBoardNormalDirection = cad.model_board_normal_direction
-  if (!modelBoardNormalDirection) {
+function getOrientationRotationForBoardNormal(
+  modelBoardNormalDirection?: CadComponent["model_board_normal_direction"],
+): Point3 {
+  if (!modelBoardNormalDirection || modelBoardNormalDirection === "z+") {
     return { x: 0, y: 0, z: 0 }
   }
 
   switch (modelBoardNormalDirection) {
+    case "x+":
+      return { x: 0, y: 0, z: 90 }
     case "x-":
       return { x: 0, y: 0, z: -90 }
+    case "y+":
+      return { x: 0, y: 0, z: 0 }
     case "y-":
       return { x: 0, y: 0, z: 180 }
     case "z-":
@@ -25,12 +38,43 @@ export function getModelOrientationRotation(cad: CadComponent): Point3 {
   }
 }
 
+export function getMeshWithBoardNormalTransform<T extends STLMesh | OBJMesh>(
+  mesh: T,
+  modelBoardNormalDirection?: CadComponent["model_board_normal_direction"],
+): T {
+  return rotateMesh(
+    mesh,
+    getOrientationRotationForBoardNormal(modelBoardNormalDirection),
+  )
+}
+
 export function getMeshOrigin(
   cad: CadComponent,
   meshBounds: { min: Point3; max: Point3 },
+  options?: {
+    loaderTransform?: CoordinateTransformConfig
+    modelBoardNormalDirection?: CadComponent["model_board_normal_direction"]
+  },
 ): Point3 | null {
   if (cad.model_origin_position) {
-    return cad.model_origin_position
+    let origin: Point3 = {
+      x: cad.model_origin_position.x,
+      y: cad.model_origin_position.y,
+      z: cad.model_origin_position.z,
+    }
+
+    if (options?.loaderTransform) {
+      origin = applyCoordinateTransform(origin, options.loaderTransform)
+    }
+
+    if (options?.modelBoardNormalDirection) {
+      origin = rotatePoint(
+        origin,
+        getOrientationRotationForBoardNormal(options.modelBoardNormalDirection),
+      )
+    }
+
+    return origin
   }
 
   switch (cad.model_origin_alignment) {
