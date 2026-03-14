@@ -1,8 +1,15 @@
 import type { CadComponent } from "circuit-json"
-import type { OBJMesh, Point3, STLMesh } from "../types"
+import type {
+  CoordinateTransformConfig,
+  OBJMesh,
+  Point3,
+  STLMesh,
+} from "../types"
+import { applyCoordinateTransform } from "./coordinate-transform"
 import {
   getBoundingBoxCenter,
   getBoundingBoxSize,
+  rotatePoint,
   scaleMesh,
   scaleMeshByAxis,
 } from "./mesh-scale"
@@ -28,9 +35,29 @@ export function getModelOrientationRotation(cad: CadComponent): Point3 {
 export function getMeshOrigin(
   cad: CadComponent,
   meshBounds: { min: Point3; max: Point3 },
+  options?: {
+    loaderTransform?: CoordinateTransformConfig
+    orientationRotation?: Point3
+    modelScaleFactor?: number
+  },
 ): Point3 | null {
   if (cad.model_origin_position) {
-    return cad.model_origin_position
+    const scale = options?.modelScaleFactor ?? 1
+    let origin: Point3 = {
+      x: cad.model_origin_position.x * scale,
+      y: cad.model_origin_position.y * scale,
+      z: cad.model_origin_position.z * scale,
+    }
+
+    if (options?.loaderTransform) {
+      origin = applyCoordinateTransform(origin, options.loaderTransform)
+    }
+
+    if (options?.orientationRotation) {
+      origin = rotatePoint(origin, options.orientationRotation)
+    }
+
+    return origin
   }
 
   switch (cad.model_origin_alignment) {

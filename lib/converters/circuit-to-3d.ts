@@ -491,9 +491,14 @@ export async function convertCircuitJsonTo3D(
     }
 
     if (box.mesh) {
-      box.mesh = rotateMesh(box.mesh, getModelOrientationRotation(cad))
+      const modelOrientationRotation = getModelOrientationRotation(cad)
+      box.mesh = rotateMesh(box.mesh, modelOrientationRotation)
 
-      const meshOrigin = getMeshOrigin(cad, box.mesh.boundingBox)
+      const meshOrigin = getMeshOrigin(cad, box.mesh.boundingBox, {
+        loaderTransform: defaultTransform,
+        orientationRotation: modelOrientationRotation,
+        modelScaleFactor,
+      })
       if (meshOrigin) {
         box.mesh = translateMesh(box.mesh, {
           x: -meshOrigin.x,
