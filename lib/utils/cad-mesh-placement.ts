@@ -54,15 +54,13 @@ export function getMeshOrigin(
   options?: {
     loaderTransform?: CoordinateTransformConfig
     modelBoardNormalDirection?: CadComponent["model_board_normal_direction"]
-    modelScaleFactor?: number
   },
 ): Point3 | null {
   if (cad.model_origin_position) {
-    const scale = options?.modelScaleFactor ?? 1
     let origin: Point3 = {
-      x: cad.model_origin_position.x * scale,
-      y: cad.model_origin_position.y * scale,
-      z: cad.model_origin_position.z * scale,
+      x: cad.model_origin_position.x,
+      y: cad.model_origin_position.y,
+      z: cad.model_origin_position.z,
     }
 
     if (options?.loaderTransform) {
