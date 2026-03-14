@@ -22,9 +22,9 @@ import type {
   Scene3D,
 } from "../types"
 import {
-  applyModelBoardNormalTransform,
   fitMeshToCadBounds,
   getMeshOrigin,
+  getMeshWithBoardNormalTransform,
 } from "../utils/cad-mesh-placement"
 import { getDefaultModelTransform } from "../utils/get-default-model-transform"
 import {
@@ -490,7 +490,7 @@ export async function convertCircuitJsonTo3D(
     }
 
     if (box.mesh) {
-      box.mesh = applyModelBoardNormalTransform(
+      box.mesh = getMeshWithBoardNormalTransform(
         box.mesh,
         cad.model_board_normal_direction,
       )

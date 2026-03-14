@@ -38,7 +38,7 @@ function getOrientationRotationForBoardNormal(
   }
 }
 
-export function applyModelBoardNormalTransform<T extends STLMesh | OBJMesh>(
+export function getMeshWithBoardNormalTransform<T extends STLMesh | OBJMesh>(
   mesh: T,
   modelBoardNormalDirection?: CadComponent["model_board_normal_direction"],
 ): T {
